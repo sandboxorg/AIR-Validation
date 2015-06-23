@@ -38,7 +38,7 @@ data <-
 
 write.table(data,"//qafile2/Leonardo/Feature Data/CLF Exports/Testresults/rc-2/M60rerunfinal/CRFSTC.csv",row.names=F) 
 
-
+Print('Test')
 # 
 # library(xlsx)
 # library("RODBC")
