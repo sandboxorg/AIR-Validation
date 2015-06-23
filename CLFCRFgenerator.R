@@ -39,6 +39,7 @@ data <-
 write.table(data,"//qafile2/Leonardo/Feature Data/CLF Exports/Testresults/rc-2/M60rerunfinal/CRFSTC.csv",row.names=F) 
 
 Print('Test')
+Print('Shashank_update')
 # 
 # library(xlsx)
 # library("RODBC")
