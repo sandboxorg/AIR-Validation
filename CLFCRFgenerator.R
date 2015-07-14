@@ -11,7 +11,7 @@ data <-
   data.frame(do.call("rbind", 
           lapply(file_list, 
                  function(x) 
-                   read.csv(paste(folder, x, sep=''), 
+                   read.csv(paste(folder, x, sep=','), 
                             stringsAsFactors = FALSE))))
 #data[data==""] <- NA
 #data <- na.omit(data)
@@ -20,6 +20,8 @@ write.table(data,folder1,row.names=F)
 }
 
 CRFSTC(folder,folder1)
+
+
 
 
 folder <- "//qafile2/Leonardo/Feature Data/CLF Exports/Testresults/rc-2/M60rerunfinal/"      # path to folder that holds multiple .csv files
@@ -31,7 +33,7 @@ data <-
   data.frame(do.call("rbind", 
                      lapply(file_list, 
                             function(x) 
-                              read.csv(paste(folder, x, sep=''), 
+                              read.csv(paste(folder, x, sep=','), 
                                        stringsAsFactors = FALSE))))
 # data[data==""] <- NA
 # data <- na.omit(data)

@@ -26,9 +26,9 @@ for (n in 1:nrow(g))
   g[n,1]<-as.character(gsub('^[+]*|[+ ]*$', '', g[n,1]),quote=FALSE)
 }
 
-write.table(g, "c:/mydata.csv", sep="\t",col.names=FALSE,row.names=FALSE,quote=FALSE)
-g<-read.csv('c:/mydata.csv',stringsAsFactors=FALSE,header=FALSE)
-newg<-g
+# write.table(g, "c:/mydata.csv", sep="\t",col.names=FALSE,row.names=FALSE,quote=FALSE)
+# g<-read.csv('c:/mydata.csv',stringsAsFactors=FALSE,header=FALSE)
+# newg<-g
 for (n in 1:nrow(g))
 {
   g[n,1]<-as.character(gsub('^[ +]*|[+ ]*$', '', g[n,1]),quote=FALSE)
