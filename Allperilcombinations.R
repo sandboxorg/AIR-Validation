@@ -1,11 +1,11 @@
-#install if necessary
-install.packages('gtools')
+
 #load library
 library(gtools)
 library(plyr)
 #urn with 3 balls
 x <- (c( 'PAL',  'PEA'  ,'PES',	'PFL',	'PPH',	'PSH',	'PSL',	'PTR',	'PTS',	'PWA',	'PWF',	'PWH',	'PWT',	'PWW',	'PWX',	'PEF',	'PNC'))
-            for (j in 1:17)
+#x <- (c( 'PAL',  'PEA'  ,'PES','PWA','PSH')) 
+for (j in 1:17)
                 {
             dat<-(data.frame(combinations(n=17,r=j,v=x,repeats.allowed=F)))
           
@@ -20,39 +20,46 @@ h[is.na(h)] <- ' '
 #write.table(h, "c:/mydata.txt", sep="\t")
 g<-data.frame(apply(h, 1, paste, collapse="+"))
 g <- data.frame(lapply(g, as.character), stringsAsFactors=FALSE)
+ g<-data.frame(as.character(gsub('^[+]*|[+ ]*$', '', g[,1]),quote=FALSE),stringsAsFactors=FALSE)
 
-for (n in 1:nrow(g))
-  {
-  g[n,1]<-as.character(gsub('^[+]*|[+ ]*$', '', g[n,1]),quote=FALSE)
-}
 
 # write.table(g, "c:/mydata.csv", sep="\t",col.names=FALSE,row.names=FALSE,quote=FALSE)
 # g<-read.csv('c:/mydata.csv',stringsAsFactors=FALSE,header=FALSE)
 # newg<-g
-for (n in 1:nrow(g))
-{
-  g[n,1]<-as.character(gsub('^[ +]*|[+ ]*$', '', g[n,1]),quote=FALSE)
-}
 
-write.table(g, "c:/mydata.csv", sep="\t",col.names=FALSE,row.names=FALSE,quote=FALSE)
-g<-read.csv('c:/mydata.csv',stringsAsFactors=FALSE,header=TRUE)
-newg1<-data.frame(g)
-newg<-data.frame(g)
-newgbuffer<-data.frame(g)
-    for(k in 1:nrow(g))
-      {
-      newg1[k,1]<-(as.character((gsub("(.*)(PAL)(.*)", "\\1\\3", g[3,1] ))))
-      newg[k,1]<-(as.character((gsub("(.*)(PAL)(.*)", "\\2", g[3,1] ))))
-       }
+g<-data.frame(as.character(gsub('^[ +]*|[+ ]*$', '', g[,1]),quote=FALSE),stringsAsFactors=FALSE)
+m<-g
+
+#l<-data.frame(gsub("PAL","PAL",g[,1]), stringsAsFactors=FALSE)
+l<-data.frame(ifelse(grepl('PAL', g[,1]), gsub('PEA|PEF|PES|PFL|PNC|PPH|PSH|PSL|PTR|PTS|PWA|PWF|PWH|PWT|PWW|PWX', "", g[,1]), g[,1]), stringsAsFactors=FALSE)
+l<-data.frame(ifelse(grepl('PEA', l[,1]), gsub('PES|PSL|PEF|PTS', "", l[,1]), l[,1]), stringsAsFactors=FALSE)
+l<-data.frame(ifelse(grepl('PWA', l[,1]), gsub('PWH|PSH|PPH', "", l[,1]), l[,1]), stringsAsFactors=FALSE)
+l<-data.frame(ifelse(grepl('PWX', l[,1]), gsub('PWT|PWW', "", l[,1]), l[,1]), stringsAsFactors=FALSE)
 
 
+  l<-data.frame(as.character(gsub('^[+]*|[+ ]*$', '', l[,1]),quote=FALSE), stringsAsFactors=FALSE)
 
-df1<-data.frame(lapply(df, as.character), stringsAsFactors=FALSE)
 
-# 
-column<-c("PES-PSA","PES","PWS","PWA","PES+PWA+PWH")
-column[grep("PES+PSA",column)]
+# write.table(g, "c:/mydata.csv", sep="\t",col.names=FALSE,row.names=FALSE,quote=FALSE)
+# g<-read.csv('c:/mydata.csv',stringsAsFactors=FALSE,header=FALSE)
+# newg<-g
 
-write.table(g, "c:/mydatanew.csv", sep="\t",col.names=FALSE,row.names=FALSE,quote=FALSE)
+  l<-data.frame(as.character(gsub('^[ +]*|[+ ]*$', '', l[,1]),quote=FALSE), stringsAsFactors=FALSE)
 
+
+
+
+l<-data.frame(unique(l))
+#l<-data.frame(ifelse(grepl('$++$', l[,1]), gsub('PWT|PWW', "", l[,1]), l[,1]), stringsAsFactors=FALSE)
+#l<-data.frame(gsub("$++$","+",l[,1]), stringsAsFactors=FALSE,row.names=F)
+l<-data.frame(gsub('\\++','+',l[,1]), stringsAsFactors=FALSE)
+
+write.table(m, "c:/mydata.txt", sep=",",row.names=F)
+write.table(l, "c:/mydata1.txt", sep=",",row.names=F)
+
+
+
+
+st <- c("PWH+PTR", "PWH+++PTR")
+gsub("\\++", "\\+", st)
 
