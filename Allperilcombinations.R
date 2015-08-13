@@ -59,7 +59,3 @@ write.table(l, "c:/mydata1.txt", sep=",",row.names=F)
 
 
 
-
-st <- c("PWH+PTR", "PWH+++PTR")
-gsub("\\++", "\\+", st)
-
