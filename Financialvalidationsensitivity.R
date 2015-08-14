@@ -4,6 +4,9 @@ install.packages("RODBC")
 install.packages("xlsx")
 install.packages("stringi")
 install.packages("plotly")
+install.packages("base64enc")
+pkgs <- c("slidify", "slidifyLibraries", "rCharts")
+devtools::install_github(pkgs, "ramnathv", ref = "dev")
 
 library(rCharts)
 library(plotly)
@@ -319,17 +322,33 @@ LowerLossEvent_FinacialSensitivity_Layer_1<-data.frame(LowerLossEvent_FinacialSe
 
 ############################################ Length to calculate number of contractID######################
 n<-nrow(LowerLossEvent_FinacialSensitivity_Layer_1)
-############################################ Length to calculate number of contractID######################
 
-#colnames(LowerLossEvent_FinacialSensitivity_Layer_1[2])
+outfile<-'//qafile2/Leonardo/Feature Data/'
 
-m2<- nPlot(ContractID, data=LowerLossEvent_FinacialSensitivity_Layer_1,type = 'lineChart')
-#m2$set( labels = "Grossloss",xLabels="sdfas" ) 
-m2<-m2$chart(color = c('brown', 'blue', '#594c26', 'green'))
-m2<-m2$xAxis(axisLabel='ContractID')
-m2<-m2$yAxis(axisLabel='GrossLoss')
-m2<-m2$chart(forceX = c(0, n))
-#m2$save(substring<-`(outfil),'.html'),andalone = TRUE)
+             for (i in 2:88)
+               {
+                         z<-data.frame(LowerLossEvent_FinacialSensitivity_Layer_1[,c(1,i)]);
+                  
+                           if(is.na(z[1,2]))
+                            {
+                                print("error");
+                            } else{ 
+                                value <- colnames(z);
+                                m2<-nPlot(x=value[1], y=value[2], data=z,type = 'lineChart');
+                                m2$chart(color = c('brown', 'blue', '#594c26', 'green'));
+                                m2$xAxis(axisLabel='ContractID');
+                                m2$chart(forceX = c(0, n));
+                                m2$save(paste(outfile,i,'.html',sep=""),standalone = TRUE);
+                            }  
+           
+                         
+  
+                         
+                }
+
+
+
+write.table(LowerLossEvent_FinacialSensitivity_Layer_1,"c:/test.csv",sep=",",quote=F)
 
 
 
