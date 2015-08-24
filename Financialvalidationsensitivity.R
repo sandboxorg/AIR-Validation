@@ -1,32 +1,17 @@
-#install.packages("ggplot2")
-# install.packages("rCharts")
-# install.packages("RODBC")
-# install.packages("xlsx")
-# install.packages("stringi")
-# install.packages("plotly")
-# install.packages("base64enc")
-# pkgs <- c("slidify", "slidifyLibraries", "rCharts")
-#  devtools::install_github(pkgs, "ramnathv", ref = "dev")
-# library(rCharts)
-# library(plotly)
-# library(RODBC)
-# library(xlsx)
-# library(stringi)
-# library(base64enc)
-#library(ggplot2)
-##  Your R script must install the packages it requires ##
-
-#devtools::install_github(pkgs, "ramnathv", ref = "dev")
+################################# LIST of All Packages required to Install ###########################################################
 list.of.packages <- c("RODBC", "getopt", "optparse","ggplot2","rCharts","slidify", "slidifyLibraries", "rCharts","plotly","googleVis")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages, repos = "http://cran.r-project.org/", type="win.binary")
 
+
+########################################Fetching the libraries#######################################################################
 library(RODBC)
 library(ggplot2)
 library(googleVis)
 library(optparse)
 
 
+################################################## For Automation Gherkin Use Only ##################################################
 option_list <- list(
   make_option("--outfile", help = "CSV file to save results to, this is required")
 )
@@ -46,46 +31,43 @@ if ( is.null(inputs$options$outfile) ) {
 
 
 
-#########################for validation gherkin ####################################################################
-# Check for the output file
 
 
 
-
-
-###### analysis name, result db to pass ############
-resultdb<-inputs$args[1]#'Layer_Validation_Loss'
-analysisname<-inputs$args[2]#'Layer_validationexp - Loss Analysis'
-server<-inputs$args[3]#as.character('qa-ts-p9-db\\sql2014')
+###### Required Inputs Passed through automation into the script- For automation use###############################################
+resultdb<-inputs$args[1]
+analysisname<-inputs$args[2]
+server<-inputs$args[3]
 ResultsPathnew<-inputs$args[4]
 TestcaseIDnew <-inputs$args[5]
 ValidationTypeName<-inputs$args[6]
 TSVernew <-inputs$args[7]
 TSIRnew <-inputs$args[8]
 ValidationIDnew = inputs$args[9]
-print(ResultsPathnew)
-paste(resultdb)
-paste(analysisname)
-paste(server)
-########################################valid case#########################################################
+# 
 # resultdb<-'Layer_Validation_Loss'
-# analysisname<-'Layer_validationexp - Loss Analysis'
-# server<-as.character('qa-ts-p9-db\\sql2014')
+# analysisname<-'Layer_validation_v - Loss Analysis'
+# server<-'qa-ngp-a-db1'
+# ResultsPathnew<-'//qafile2/Leonardo/Feature Data/ValidationUnitetest_vasista/FinancialSensitivity'
+# TestcaseIDnew <-1
+# ValidationTypeName<-2
+# TSVernew <-3
+# TSIRnew <-4
+# ValidationIDnew = 5
 
-# dbhandle1 <- odbcDriverConnect(sprintf("driver={SQL Server};server=%s;UID=sa;PWD=Clasic22", server))
+########################################Connection to database server##################################################################
 
-
-#dbhandle <- odbcDriverConnect(paste("driver={SQL Server}",";server=",server,"",";trusted_connection=true",sep=""))
 dbhandle <- odbcDriverConnect(sprintf("driver={SQL Server};server=%s;UID=sa;PWD=Clasic22", server))
 
+########################################Dynamical use of result SID from database related to the analysis user ran#####################
 sql_query2 <-paste("SELECT convert(varchar(100),resultsid)  from [",resultdb,"].[dbo].[tAnalysisResult] where analysisname='",analysisname,"'",sep='')
 print(sql_query2)
-#sql_query<- as.string(sql_query)
+
+#########################################Assigning result SID to an object#############################################################
 resultsid<- as.character(sqlQuery(dbhandle,sql_query2) )
 print(resultsid)
-# resultsid5<- as.character(sqlQuery(dbhandle1,sql_query2) )
 
-###########################################Financial Columns to be picked dynamicaaly by passing to variable ###################################
+#################################### Financial Columns in the analysis to be used in the charts dynamically by passing to object ###################################
 
 
 FinanP1<-sqlQuery(dbhandle, paste("SELECT COLUMN_NAME FROM ",resultdb,".INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 't",resultsid,"_LOSS_ByContract' and TABLE_CATALOG='",resultdb,"' and COLUMN_NAME='RetainedLoss'",sep=""), stringsAsFactors=FALSE)
@@ -265,7 +247,7 @@ newFinanP86='NULL'; try(if((FinanP86)==''){newFinanP86<-NA;}else{ newFinanP86<-p
 newFinanP87<-'NULL' ;try(if((FinanP87)==''){newFinanP87<-NA;}else{ newFinanP87<-paste("a.",(FinanP87),sep='');},silent = TRUE)
 
 
-################################################################################################################################################
+##################################### SQL Query to create a data frame with the contractID and the finacials in the result Database################################################################
 
 
 sql_query1 <-paste("SELECT distinct b.Contractid,",newFinanP1,",",newFinanP2,",", newFinanP3 ,",",newFinanP4 ,",",
@@ -352,42 +334,36 @@ sql_query1 <-paste("SELECT distinct b.Contractid,",newFinanP1,",",newFinanP2,","
                    newFinanP85,",",
                    newFinanP86,",", newFinanP87, " FROM [",resultdb,"].[dbo].[t",resultsid,"_LOSS_ByContract] a join [",resultdb,"]..[t",resultsid,"_LOSS_DimContract] b  on a.contractsid=b.contractsid   WHERE EventID = (SELECT TOP 1 EventID FROM [",resultdb,"].[dbo].[t",resultsid,"_LOSS_ByEvent] ORDER BY GroundUpLoss asc )",sep='')
 
-print(sql_query1)
 
 
+###############################################Passing the dataFrame to an object#######################################################
 LowerLossEvent_FinacialSensitivity_Layer_1 <- data.frame(sqlQuery(dbhandle,sql_query1, stringsAsFactors = FALSE))  
-#print(LowerLossEvent_FinacialSensitivity_Layer_1)
-# remove(dbhandle)
-# remove(sql_query)
-# odbcCloseAll()
 
+###############################################Assigning columns to the dataframe#######################################################
 colnames(LowerLossEvent_FinacialSensitivity_Layer_1)<-c('ContractID','RetainedLoss',	'Grounduploss',	'GrossLoss',	'NetOfPreCATLoss',	'PostCATNetLoss',	'PreLayerGrossLoss',	'TotalPerRiskReRecoveryLoss',	'GroundUpSD',	'RetainedSD',	'PreLayerGrossSD',	'GrossSD',	'GroundUpMaxLoss',	'RetainedMaxLoss',	'PreLayerGrossMaxLoss',	'GrossMaxLoss',	'GroundUpLoss_Minor',	'GroundUpLoss_Moderate',	'GroundUpLoss_Major',	'GroundUpLoss_Fatal',	'GrossLoss_Minor',	'GrossLoss_Moderate',	'GrossLoss_Major',	'GrossLoss_Fatal',	'NetOfPreCATLoss_Minor',	'NetOfPreCATLoss_Moderate',	'NetOfPreCATLoss_Major',	'NetOfPreCATLoss_Fatal',	'PostCATNetLoss_Minor',	'PostCATNetLoss_Moderate',	'PostCATNetLoss_Major',	'PostCATNetLoss_Fatal',	'InjuryCount_Minor',	'InjuryCount_Moderate',	'InjuryCount_Major',	'InjuryCount_Fatal',	'GroundUpLoss_A',	'GroundUpLoss_B',	'GroundUpLoss_C',	'GroundUpLoss_D',	'RetainedLoss_A',	'RetainedLoss_B',	'RetainedLoss_C',	'RetainedLoss_D',	'PreLayerGrossLoss_A',	'PreLayerGrossLoss_B',	'PreLayerGrossLoss_C',	'PreLayerGrossLoss_D',	'GrossLoss_A',	'GrossLoss_B',	'GrossLoss_C',	'GrossLoss_D',	'NetOfPreCATLoss_A',	'NetOfPreCATLoss_B',	'NetOfPreCATLoss_C',	'NetOfPreCATLoss_D',	'GroundUpSD_A',	'GroundUpSD_B',	'GroundUpSD_C',	'GroundUpSD_D',	'RetainedSD_A',	'RetainedSD_B',	'RetainedSD_C',	'RetainedSD_D',	'PreLayerGrossSD_A',	'PreLayerGrossSD_B',	'PreLayerGrossSD_C',	'PreLayerGrossSD_D',	'GrossSD_A',	'GrossSD_B',	'GrossSD_C',	'GrossSD_D',	'GroundUpMaxLoss_A',	'GroundUpMaxLoss_B',	'GroundUpMaxLoss_C',	'GroundUpMaxLoss_D',	'RetainedMaxLoss_A',	'RetainedMaxLoss_B',	'RetainedMaxLoss_C',	'RetainedMaxLoss_D',	'PreLayerGrossMaxLoss_A',	'PreLayerGrossMaxLoss_B',	'PreLayerGrossMaxLoss_C',	'PreLayerGrossMaxLoss_D',	'GrossMaxLoss_A',	'GrossMaxLoss_B',	'GrossMaxLoss_C',	'GrossMaxLoss_D')
 
-########################################### Data Manipulation ##############################################
-#LowerLossEvent_FinacialSensitivity_Layer_1<-LowerLossEvent_FinacialSensitivity_Layer_1[ order(LowerLossEvent_FinacialSensitivity_Layer_1$ContractID), ] 
+########################################### Data Manipulation ########################################################################
+c<-data.frame(sub(".*_", "",LowerLossEvent_FinacialSensitivity_Layer_1$ContractID),stringsAsFactors = FALSE)
+colnames(c)<-('OrderID')#dat
+c<-data.frame(lapply(c, as.numeric))
+c <-cbind(LowerLossEvent_FinacialSensitivity_Layer_1,c)
+LowerLossEvent_FinacialSensitivity_Layer_1<-c[order(c$OrderID),c(1:88)]
 LowerLossEvent_FinacialSensitivity_Layer_1<-data.frame(LowerLossEvent_FinacialSensitivity_Layer_1,row.names=NULL)
 LowerLossEvent_FinacialSensitivity_Layer_1[is.na(LowerLossEvent_FinacialSensitivity_Layer_1)]<-""
 LowerLossEvent_FinacialSensitivity_Layer_1[,c(2:88)]<-as.numeric(unlist(LowerLossEvent_FinacialSensitivity_Layer_1[,c(2:88)]))
-#LowerLossEvent_FinacialSensitivity_Layer_1$ContractID = as.character(LowerLossEvent_FinacialSensitivity_Layer_1$ContractID)
-
-#print(LowerLossEvent_FinacialSensitivity_Layer_1)
 LowerLossEvent_FinacialSensitivity_Layer_1<-data.frame(LowerLossEvent_FinacialSensitivity_Layer_1, stringsAsFactors = FALSE)
-########################################### Data Manipulation ##############################################
 
-############################################ Length to calculate number of contractID######################
+
+############################################ Length to calculate number of rows in dataframe#########################################
 n<-nrow(LowerLossEvent_FinacialSensitivity_Layer_1)
-print(n)
+
+############################################# Manipulating the ContractID as a string#################################################
 LowerLossEvent_FinacialSensitivity_Layer_1[,1]<-as.character(LowerLossEvent_FinacialSensitivity_Layer_1[,1])
-#print(LowerLossEvent_FinacialSensitivity_Layer_1)
-#outfile<-'//qafile2/Leonardo/Feature Data/'
-a<-LowerLossEvent_FinacialSensitivity_Layer_1
-print(a)
-is.na(a)<-NULL
-# write.table(LowerLossEvent_FinacialSensitivity_Layer_1,file = outfile,col.names = TRUE, row.names = FALSE, qmethod = "double",sep=",",quote=F)
-# 
-# print(outfile)
 
 
+
+#############################################Looping through all the financial columns to plot the graph with ContractID###############
+########Graph is dumped by using certain format ( Resultpath+Testcaseid+validationname+TSversion+IRversion+ValID) to support automation########################
 
 for (i in 2:88)
 {
@@ -395,18 +371,13 @@ for (i in 2:88)
   
   if(is.na(z[1,2]))
   {
-    print("error");
+    
+    print("Columns not available in the analysis")
+    #write.table(paste("Columns not available in the analysis_",sep=""),file=paste(ResultsPathnew,"/","ErrorLog",".txt",sep=""));
+    
+    
   } else{ 
     value <- colnames(z);
-    #                                     m2<-nPlot(x=value[1], y=value[2], data=z,type = 'lineChart');
-    #                                     m2$chart(color = c('brown', 'blue', '#594c26', 'green'));
-    #                                     m2$xAxis(axisLabel='ContractID');
-    #                                     m2$chart(forceX = c(0, n));
-    #                                     m2$save(paste('//qafile2/Leonardo/Feature Data/ValidationUnitetest_vasista/FinancialSensitivity',i,'.html',sep=""),standalone = TRUE);
-    #                                     #m2<-ggplot(ContractID~Grounduploss,a,type = 'lineChart')
-    #     m2<-ggplot(data=z, aes(x=z[,1], y=z[,2],fill=value[2])) +
-    #       geom_line() +
-    #       geom_point()+ylab(value[2])+xlab(value[1])
     
     Line <- gvisLineChart(z,xvar='ContractID',yvar=value[2],
                           options=list(title=paste("Financial Sensitivity","-",value[1],"vs",value[2]),
@@ -421,17 +392,10 @@ for (i in 2:88)
   
 }
 
-# m2$save(paste('//qafile2/Leonardo/Feature Data/ValidationUnitetest_vasista/FinancialSensitivity',1,'.html',sep=""),standalone = TRUE);
 
 
-# library(ggplot2)
-# 
-# m2<-ggplot(ContractID~Grounduploss,a,type = 'lineChart')m2<-ggplot(data=a, aes(x=ContractID, y=Grounduploss)) +
-#   geom_line() +
-#   geom_point()
-# #m2$save(paste('//qafile2/Leonardo/Feature Data/ValidationUnitetest_vasista/FinancialSensitivity',1,'.pdf',sep=""),standalone = TRUE);
-# ggsave(m2,file='//qafile2/Leonardo/Feature Data/ValidationUnitetest_vasista/FinancialSensitivity/dfsd.pdf');
-# 
+#########################Removing the NA and replacing by blanks and dumping the data in a file to be used as base data in QAautodev#########
+#####################################################Data is dumped by using certain format to support automation########################
 
 LowerLossEvent_FinacialSensitivity_Layer_1[is.na(LowerLossEvent_FinacialSensitivity_Layer_1)] <- ' '
 write.table(LowerLossEvent_FinacialSensitivity_Layer_1, file = outfile, sep = ",", col.names = TRUE, row.names = FALSE, qmethod = "double")
